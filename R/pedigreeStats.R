@@ -1,5 +1,5 @@
 `pedigreeStats` <-
-function(Ped,cohorts=NULL,dat=NULL,retain='informative',graphicalReport='y') {
+function(Ped,cohorts=NULL,dat=NULL,retain='informative',graphicalReport='y',includeA=TRUE,lowMem=FALSE,grContrast=FALSE) {
   library(grid)
   library(kinship)
   library(MCMCglmm)
@@ -34,6 +34,24 @@ function(Ped,cohorts=NULL,dat=NULL,retain='informative',graphicalReport='y') {
      pedigree
   }
 
+  names(Ped)[1]<-"id"
+  if(names(Ped)[2]!="dam"|names(Ped)[3]!="sire"){
+    if(names(Ped)[3]%in%c("mum","mom","mother","Mum","Mmom","Dam","Mother","MUM","MOM","DAM","MOTHER")){
+      cat(paste("'mum' appears to be in third column, reordering to 'id','dam','sire'")); flush.console();
+      Ped<-Ped[,c(1,3,2)]
+    }
+    if(names(Ped)[2]%in%c("mum","mom","mother","Mum","Mom","Dam","Mother","MUM","MOM","DAM","MOTHER")){
+      names(Ped)[2]<-"dam"
+      names(Ped)[3]<-"sire"
+    }
+    if(names(Ped)[2]!="dam"|names(Ped)[3]!="sire"){
+     stop("Unable to identify column names, expecting 'id','dam','sire'")
+    }
+  }
+
+  for(x in 1:3) Ped[,x]<-as.character(Ped[,x])
+  if(is.null(dat)==FALSE&&is.numeric(dat)==FALSE) dat<-as.character(dat)
+
   if(is.null(cohorts)==FALSE&&length(Ped[,1])!=length(cohorts)) 
     stop("Pedigree and cohorts differ in length.")
 
@@ -60,7 +78,7 @@ function(Ped,cohorts=NULL,dat=NULL,retain='informative',graphicalReport='y') {
       keep<-dat
     }
 
-    c<-cbind(Ped$id,cohorts)
+    if(is.null(cohorts)==FALSE) c<-cbind(Ped$id,cohorts)
 
     if(retain=='informative'){
       Ped<-prune(Ped,keep,make.base=TRUE)
@@ -68,8 +86,8 @@ function(Ped,cohorts=NULL,dat=NULL,retain='informative',graphicalReport='y') {
       Ped<-prune(Ped,keep,make.base=FALSE)
     }
 
-    c<-subset(c,c[,1]%in%Ped[,1])
-    cohorts<-c[,2]
+    if(is.null(cohorts)==FALSE) c<-subset(c,c[,1]%in%Ped[,1])
+    if(is.null(cohorts)==FALSE) cohorts<-c[,2]
   }
 
   # sample size
@@ -125,6 +143,10 @@ function(Ped,cohorts=NULL,dat=NULL,retain='informative',graphicalReport='y') {
   matSibships<-as.data.frame(table(as.character(Ped$dam)))
   patSibships<-as.data.frame(table(as.character(Ped$sire)))
 
+cumulativeRelatedness<-NULL
+pairwiseRelatedness<-NULL
+relatednessBin<-NULL
+if(lowMem==FALSE){
 
   # relatedness classes
   cutoffs<-seq(-0.0125,0.9875,by=0.025)
@@ -137,13 +159,13 @@ function(Ped,cohorts=NULL,dat=NULL,retain='informative',graphicalReport='y') {
   pairwiseRelatedness<-A*abs(diag(length(A[,1]))-1)
   pairwiseRelatedness[upper.tri(pairwiseRelatedness)]<-0
   pairwiseRelatedness<-c(pairwiseRelatedness)
-  pairwiseRelatedness<-subset(pairwiseRelatedness,pairwiseRelatedness>0)
+  pairwiseRelatedness<-subset(pairwiseRelatedness,pairwiseRelatedness>1e-9)
   for(x in 1:(length(cutoffs)-1)) {
     cumulativeRelatedness[x]<-table(pairwiseRelatedness<cutoffs[x+1])["TRUE"]
     relatednessBin[x]<-table(pairwiseRelatedness>cutoffs[x]&pairwiseRelatedness<cutoffs[x+1])["TRUE"]
   }
 
-  relatednessBin
+}
 
   # MacCluer's pedigree completeness statistics
 
@@ -191,9 +213,12 @@ function(Ped,cohorts=NULL,dat=NULL,retain='informative',graphicalReport='y') {
     Y<-vector.to.design.matrix(cohorts)$DesignMatrix
     D<-diag(1/table(cohorts))
 
+meanRelatednessAmongCohorts<-NULL
+if(lowMem==FALSE){
     meanRelatednessAmongCohorts<-t(Y%*%D)%*%A%*%(Y%*%D)
     rownames(meanRelatednessAmongCohorts)<-names(table(cohorts))
     colnames(meanRelatednessAmongCohorts)<-names(table(cohorts))
+}
 
     # sample size by cohort
 
@@ -271,6 +296,64 @@ function(Ped,cohorts=NULL,dat=NULL,retain='informative',graphicalReport='y') {
 
   }
 
+if(lowMem==FALSE&includeA==TRUE){
+
+  results<-list(totalSampleSize=totalSampleSize,
+                totalMaternities=totalMaternities,
+                totalPaternities=totalPaternities,
+                totalFullSibs=totalFullSibs[[1]],
+                totalMaternalSibs=totalMaternalSibs[[1]],
+                totalPaternalSibs=totalPaternalSibs[[1]],
+                totalMaternalGrandmothers=totalMaternalGM,
+                totalMaternalGrandfathers=totalMaternalGF,
+                totalPaternalGrandmothers=totalPaternalGM,
+                totalPaternalGrandfathers=totalPaternalGF,
+                pedigreeDepth=pedigreeDepth,
+                inbreedingCoefficients=reorderInbreeding$inbreeding,
+                Amatrix=A,
+                maternalSibships=matSibships,
+                paternalSibships=patSibships,
+                cumulativeRelatedness=cumulativeRelatedness,
+                relatednessCategories=relatednessBin,
+                analyzedPedigree=Ped)
+
+  if(is.null(cohorts)==FALSE) {
+    results<-list(totalSampleSize=totalSampleSize,
+                totalMaternities=totalMaternities,
+                totalPaternities=totalPaternities,
+                totalFullSibs=totalFullSibs[[1]],
+                totalMaternalSibs=totalMaternalSibs[[1]],
+                totalPaternalSibs=totalPaternalSibs[[1]],
+                totalMaternalGrandmothers=totalMaternalGM,
+                totalMaternalGrandfathers=totalMaternalGF,
+                totalPaternalGrandmothers=totalPaternalGM,
+                totalPaternalGrandfathers=totalPaternalGF,
+                sampleSizesByCohort=cohortSampleSizes,
+                maternitiesByCohort=cohortMaternities,
+                paternitiesByCohort=cohortPaternities,
+                fullSibsByCohort=cohortFullSibs,
+                maternalSibsByCohort=cohortMaternalSibs,
+                paternalSibsByCohort=cohortPaternalSibs,
+                maternalGrandmothersByCohort=cohortMaternalGM,
+                maternalGrandfathersByCohort=cohortMaternalGF,
+                paternalGrandmothersByCohort=cohortPaternalGM,
+                paternalGrandfathersByCohort=cohortPaternalGF,
+                pedigreeDepth=pedigreeDepth,
+                cumulativePedigreeDepth=cohortPedgireeDepth,
+                meanRelatednessAmongCohorts=meanRelatednessAmongCohorts,
+                inbreedingCoefficients=reorderInbreeding$inbreeding,
+                Amatrix=A,
+                maternalSibships=matSibships,
+                paternalSibships=patSibships,
+                cumulativeRelatedness=cumulativeRelatedness,
+                relatednessCategories=relatednessBin,
+                cohorts=cohorts,
+                analyzedPedigree=Ped)
+  }
+
+
+}else{
+
   results<-list(totalSampleSize=totalSampleSize,
                 totalMaternities=totalMaternities,
                 totalPaternities=totalPaternities,
@@ -320,11 +403,18 @@ function(Ped,cohorts=NULL,dat=NULL,retain='informative',graphicalReport='y') {
                 relatednessCategories=relatednessBin,
                 cohorts=cohorts,
                 analyzedPedigree=Ped)
+
   }
+
+
+}
 
 if(graphicalReport=='y'){
 
-  if(is.null(cohorts)==FALSE) {
+  col1<-'red';  col2<-'blue';
+  if(grContrast==TRUE) { col1<-colors()[117]; col2<-colors()[109]; }
+
+  if(is.null(cohorts)==FALSE&lowMem==FALSE) {
     cohortRelatedness<-as.data.frame(results$meanRelatednessAmongCohorts)
     cohortTakeOneRelatedness<-array(dim=length(cohortRelatedness[1,]))
     for(x in 1:(length(cohortTakeOneRelatedness)-1)) cohortTakeOneRelatedness[x+1]<-cohortRelatedness[x,x+1]
@@ -351,10 +441,10 @@ if(graphicalReport=='y'){
     }
   }
 
-  inbredSubset<-as.data.frame(cbind(results$cohorts,results$inbreedingCoefficients))
-  inbredSubset<-subset(inbredSubset, as.numeric(as.character(inbredSubset[,2]))>0)
-  proportionInbred<-length(inbredSubset[,2])/results$totalSampleSize
-  hist(as.numeric(as.character(inbredSubset[,2])), xlab="Inbreeding coefficient",ylab="Count",main="")
+#  inbredSubset<-as.data.frame(cbind(results$cohorts,results$inbreedingCoefficients))
+  inbredSubset<-subset(results$inbreedingCoefficients, results$inbreedingCoefficients>0)
+  proportionInbred<-length(inbredSubset)/results$totalSampleSize
+  hist(as.numeric(as.character(inbredSubset)), xlab="Inbreeding coefficient",ylab="Count",main="")
   mtext("Distribution of inbreeding coefficients, as ",side=1,line=5)
   mtext("estimated from the pedigree, among the",side=1,line=6)
   mtext("ndividuals in the pedigree with F>0.",side=1,line=7)
@@ -379,7 +469,7 @@ if(graphicalReport=='y'){
     }
   }
 
-  plot(as.numeric(colnames(results$cumulativePedigreeDepth)),as.numeric(as.character(results$pedigreeDepth)),type='l', xlab="Pedigree depth",ylab="Count")
+  plot(as.numeric(names(results$pedigreeDepth)),as.numeric(as.character(results$pedigreeDepth)),type='l', xlab="Pedigree depth",ylab="Count")
   mtext("Distribution of pedigree depth.",side=1,line=5)
   inp<-readline(prompt = "Press <s> to save current plot or press <Enter> to continue...") 
   if(inp=='s'){
@@ -407,6 +497,8 @@ if(graphicalReport=='y'){
   }
 
   if(is.null(cohorts)==FALSE) {
+    thickness<-1
+    if(grContrast==TRUE) thickness<-1.7
     sibCohortData<-as.data.frame(cbind(
                as.numeric(as.character(results$fullSibsByCohort)),
                as.numeric(as.character(results$maternalSibsByCohort)),
@@ -415,13 +507,13 @@ if(graphicalReport=='y'){
                             -as.numeric(as.character(results$fullSibsByCohort)),
                as.numeric(as.character(results$paternalSibsByCohort))
                             -as.numeric(as.character(results$fullSibsByCohort)) ))
-    plot(as.numeric(names(results$fullSibsByCohort)),sibCohortData[,1],type='l',ylim=c(0,max(sibCohortData)), xlab="Cohort",ylab="Count")
-    lines(as.numeric(names(results$fullSibsByCohort)),sibCohortData[,2],lty='dotted',col='red')
-    lines(as.numeric(names(results$fullSibsByCohort)),sibCohortData[,4],col='red')
-    lines(as.numeric(names(results$fullSibsByCohort)),sibCohortData[,3],lty='dotted',col='blue')
-    lines(as.numeric(names(results$fullSibsByCohort)),sibCohortData[,5],col='blue')
+    plot(as.numeric(names(results$fullSibsByCohort)),sibCohortData[,1],type='l',ylim=c(0,max(sibCohortData)), xlab="Cohort",ylab="Count",lwd=thickness)
+    lines(as.numeric(names(results$fullSibsByCohort)),sibCohortData[,2],lty='dashed',col=col1,lwd=thickness)
+    lines(as.numeric(names(results$fullSibsByCohort)),sibCohortData[,4],col=col1,lwd=thickness)
+    lines(as.numeric(names(results$fullSibsByCohort)),sibCohortData[,3],lty='dashed',col=col2,lwd=thickness)
+    lines(as.numeric(names(results$fullSibsByCohort)),sibCohortData[,5],col=col2,lwd=thickness)
     mtext("Known sib pairs by cohort.  Black line: full sibs, red: maternal sibs,",side=1,line=5)
-    mtext("blue: paternal sibs, dotted: total maternal and paternal",side=1,line=6)
+    mtext("blue: paternal sibs, dashed: total maternal and paternal",side=1,line=6)
     mtext("bs, solid coloured: maternal and paternal half sibs.",side=1,line=7)
     inp<-readline(prompt = "Press <s> to save current plot or press <Enter> to continue...") 
     if(inp=='s'){
@@ -434,13 +526,13 @@ if(graphicalReport=='y'){
       s<-readline(prompt = "Enter path (including file name but not extension) to which to save image: ") 
       postscript(paste(s,".eps",sep=""),width=8,height=8,horizontal=FALSE)
       par(oma=c(5,1,1,1))
-    plot(as.numeric(names(results$fullSibsByCohort)),sibCohortData[,1],type='l',ylim=c(0,max(sibCohortData)), xlab="Cohort",ylab="Count")
-    lines(as.numeric(names(results$fullSibsByCohort)),sibCohortData[,2],lty='dotted',col='red')
-    lines(as.numeric(names(results$fullSibsByCohort)),sibCohortData[,4],col='red')
-    lines(as.numeric(names(results$fullSibsByCohort)),sibCohortData[,3],lty='dotted',col='blue')
-    lines(as.numeric(names(results$fullSibsByCohort)),sibCohortData[,5],col='blue')
+    plot(as.numeric(names(results$fullSibsByCohort)),sibCohortData[,1],type='l',ylim=c(0,max(sibCohortData)), xlab="Cohort",ylab="Count",lwd=thickness)
+    lines(as.numeric(names(results$fullSibsByCohort)),sibCohortData[,2],lty='dashed',col=col1,lwd=thickness)
+    lines(as.numeric(names(results$fullSibsByCohort)),sibCohortData[,4],col=col1,lwd=thickness)
+    lines(as.numeric(names(results$fullSibsByCohort)),sibCohortData[,3],lty='dashed',col=col2,lwd=thickness)
+    lines(as.numeric(names(results$fullSibsByCohort)),sibCohortData[,5],col=col2,lwd=thickness)
     mtext("Known sib pairs by cohort.  Black line: full sibs, red: maternal sibs,",side=1,line=5)
-    mtext("blue: paternal sibs, dotted: total maternal and paternal",side=1,line=6)
+    mtext("blue: paternal sibs, dashed: total maternal and paternal",side=1,line=6)
     mtext("bs, solid coloured: maternal and paternal half sibs.",side=1,line=7)
       dev.off()
       readline(prompt = "File saved.  Press <Enter> to continue...")
@@ -450,14 +542,16 @@ if(graphicalReport=='y'){
   }
 
   if(is.null(cohorts)==FALSE) {
+    thickness<-1
+    if(grContrast==TRUE) thickness<-1.7
     ymax<-max(max(results$maternalGrandmothersByCohort),max(results$maternalGrandfathersByCohort),max(results$paternalGrandmothersByCohort),max(results$paternalGrandfathersByCohort))
-    plot(as.numeric(names(results$fullSibsByCohort)),as.numeric(as.character(results$maternalGrandmothersByCohort)),col='red',type='l',ylim=c(0,ymax), xlab="Pedigree depth",ylab="Count")
-    lines(as.numeric(names(results$fullSibsByCohort)),as.numeric(as.character(results$maternalGrandfathersByCohort)),lty='dotted',col='red')
-    lines(as.numeric(names(results$fullSibsByCohort)),as.numeric(as.character(results$paternalGrandmothersByCohort)),col='blue')
-    lines(as.numeric(names(results$fullSibsByCohort)),as.numeric(as.character(results$paternalGrandfathersByCohort)),lty='dotted',col='blue')
+    plot(as.numeric(names(results$fullSibsByCohort)),as.numeric(as.character(results$maternalGrandmothersByCohort)),col=col1,type='l',ylim=c(0,ymax), xlab="Pedigree depth",ylab="Count",lwd=thickness)
+    lines(as.numeric(names(results$fullSibsByCohort)),as.numeric(as.character(results$maternalGrandfathersByCohort)),lty='dashed',col=col1,lwd=thickness)
+    lines(as.numeric(names(results$fullSibsByCohort)),as.numeric(as.character(results$paternalGrandmothersByCohort)),col=col2,lwd=thickness)
+    lines(as.numeric(names(results$fullSibsByCohort)),as.numeric(as.character(results$paternalGrandfathersByCohort)),lty='dashed',col=col2,lwd=thickness)
     mtext("Known grandparents by cohort (i.e., cohort of grand-offspring).",side=1,line=5)
     mtext("Red: maternal grandparents, blue: paternal grand",side=1,line=6)
-    mtext("parents, solid: grandmothers, dotted: grandfathers.",side=1,line=7)
+    mtext("parents, solid: grandmothers, dashed: grandfathers.",side=1,line=7)
     inp<-readline(prompt = "Press <s> to save current plot or press <Enter> to continue...") 
     if(inp=='s'){
       s<-readline(prompt = "Enter path (including file name but not extension) to which to save image: ") 
@@ -469,13 +563,13 @@ if(graphicalReport=='y'){
       s<-readline(prompt = "Enter path (including file name but not extension) to which to save image: ") 
       postscript(paste(s,".eps",sep=""),width=8,height=8,horizontal=FALSE)
       par(oma=c(5,1,1,1))
-    plot(as.numeric(names(results$fullSibsByCohort)),as.numeric(as.character(results$maternalGrandmothersByCohort)),col='red',type='l',ylim=c(0,ymax), xlab="Pedigree depth",ylab="Count")
-    lines(as.numeric(names(results$fullSibsByCohort)),as.numeric(as.character(results$maternalGrandfathersByCohort)),lty='dotted',col='red')
-    lines(as.numeric(names(results$fullSibsByCohort)),as.numeric(as.character(results$paternalGrandmothersByCohort)),col='blue')
-    lines(as.numeric(names(results$fullSibsByCohort)),as.numeric(as.character(results$paternalGrandfathersByCohort)),lty='dotted',col='blue')
+    plot(as.numeric(names(results$fullSibsByCohort)),as.numeric(as.character(results$maternalGrandmothersByCohort)),col=col1,type='l',ylim=c(0,ymax), xlab="Pedigree depth",ylab="Count",lwd=thickness)
+    lines(as.numeric(names(results$fullSibsByCohort)),as.numeric(as.character(results$maternalGrandfathersByCohort)),lty='dashed',col=col1,lwd=thickness)
+    lines(as.numeric(names(results$fullSibsByCohort)),as.numeric(as.character(results$paternalGrandmothersByCohort)),col=col2,lwd=thickness)
+    lines(as.numeric(names(results$fullSibsByCohort)),as.numeric(as.character(results$paternalGrandfathersByCohort)),lty='dashed',col=col2,lwd=thickness)
     mtext("Known grandparents by cohort (i.e., cohort of grand-offspring).",side=1,line=5)
     mtext("Red: maternal grandparents, blue: paternal grand",side=1,line=6)
-    mtext("parents, solid: grandmothers, dotted: grandfathers.",side=1,line=7)
+    mtext("parents, solid: grandmothers, dashed: grandfathers.",side=1,line=7)
       dev.off()
       readline(prompt = "File saved.  Press <Enter> to continue...")
     }
@@ -484,6 +578,8 @@ if(graphicalReport=='y'){
 
 
   }
+
+if(lowMem==FALSE){
 
   relatednessInterval<-as.numeric(names(results$relatednessCategories)[3])-as.numeric(names(results$relatednessCategories)[2])
   midBins<-as.numeric(names(results$relatednessCategories))
@@ -505,6 +601,8 @@ if(graphicalReport=='y'){
     savePlot(paste(s,".jpeg",sep=""),type="jpeg")
     readline(prompt = "File saved.  Press <Enter> to continue...")
   }
+
+}
 
   hist(results$maternalSibships[,2],xlab="(non-zero) maternal sibship sizes",ylab="count",main="")
   inp<-readline(prompt = "Press <s> to save current plot or press <Enter> to continue...") 
@@ -576,16 +674,19 @@ if(graphicalReport=='y'){
 
   if(inp=='y'&is.null(cohorts)==FALSE){
     cat("Generating pedigree image...")
+    x11()
     drawPedigree(Ped=results$analyzedPedigree,cohorts=results$cohorts,writeCohortLabels='y')
     cat("done.")
     cat('\n')
     readline(prompt = "Pause. Press <Enter> to continue...") 
     cat("Generating image of maternal pedigre links...")
+    x11()
     drawPedigree(Ped=results$analyzedPedigree,cohorts=results$cohorts,writeCohortLabels='y',links='mums')
     cat("done.")
     cat('\n')
     readline(prompt = "Pause. Press <Enter> to continue...") 
     cat("Generating image of paternal pedigre links...")
+    x11()
     drawPedigree(Ped=results$analyzedPedigree,cohorts=results$cohorts,writeCohortLabels='y',links='dads')
     cat("done.")
     cat('\n')
@@ -593,16 +694,19 @@ if(graphicalReport=='y'){
 
   if(inp=='y'&is.null(cohorts)){
     cat("Generating pedigree image...")
+    x11()
     drawPedigree(Ped=results$analyzedPedigree)
     cat("done.")
     cat('\n')
     readline(prompt = "Pause. Press <Enter> to continue...") 
     cat("Generating image of maternal pedigre links...")
+    x11()
     drawPedigree(Ped=results$analyzedPedigree,links='mums')
     cat("done.")
     cat('\n')
     readline(prompt = "Pause. Press <Enter> to continue...") 
     cat("Generating image of paternal pedigre links...")
+    x11()
     drawPedigree(Ped=results$analyzedPedigree,links='dads')
     cat("done.")
     cat('\n')

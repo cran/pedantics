@@ -9,7 +9,7 @@ drawPedigree(Ped, cohorts = NULL, sex = NULL, dat = NULL, dots = "n",
               plotfull = "y", writeCohortLabels = "n", links = "all", 
               sexInd = c(0, 1), dotSize = 0.001, dataDots = "n", 
               dataDots.cex = 2, cohortLabs.cex = 1, retain="informative", 
-              focal=NULL, ...)
+              focal=NULL, sexColours=c('red','blue'), ...)
 }
 %- maybe also 'usage' for other objects documented here.
 \arguments{
@@ -28,6 +28,7 @@ drawPedigree(Ped, cohorts = NULL, sex = NULL, dat = NULL, dots = "n",
   \item{cohortLabs.cex}{controls the size of cohort lables.}
   \item{retain}{When those pedigree links only informative relative to phenotypic data availability are to be plotted, this controls whether or not a pruned pedigree based on phenotypic data is plotted (if set to "pruned"), or whether strictly only those informative pedigree links are plotted (the default)}
   \item{focal}{An optional list containing the id of an individual and the kinds of relatives of the focal individual to which to plot pedigree links.  Available types are 'offspring','descendents','parents',,ancestors', and 'kin'.}
+  \item{sexColours}{The colours that will be used to draw points and or lines associated with males and females.}
   \item{...}{Additional graphical parameters.}
 }
 \details{

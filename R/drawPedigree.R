@@ -1,5 +1,5 @@
 `drawPedigree` <-
-function(Ped,cohorts=NULL,sex=NULL,dat=NULL, dots='n',plotfull='y',writeCohortLabels='n',links='all',sexInd=c(0,1),dotSize=0.001,dataDots='n',dataDots.cex=2,cohortLabs.cex=1, retain='informative',focal=NULL, ...) {
+function(Ped,cohorts=NULL,sex=NULL,dat=NULL, dots='n',plotfull='y',writeCohortLabels='n',links='all',sexInd=c(0,1),dotSize=0.001,dataDots='n',dataDots.cex=2,cohortLabs.cex=1, retain='informative',focal=NULL, sexColours=c('red','blue'), ...) {
 
 for(x in 1:3) Ped[,x]<-as.character(Ped[,x])
 
@@ -32,6 +32,23 @@ for(x in 1:3) Ped[,x]<-as.character(Ped[,x])
      }
      pedigree
   }
+
+  names(Ped)[1]<-"id"
+  if(names(Ped)[2]!="dam"|names(Ped)[3]!="sire"){
+    if(names(Ped)[3]%in%c("mum","mom","mother","Mum","Mmom","Dam","Mother","MUM","MOM","DAM","MOTHER")){
+      cat(paste("'mum' appears to be in third column, reordering to 'id','dam','sire'")); flush.console();
+      Ped<-Ped[,c(1,3,2)]
+    }
+    if(names(Ped)[2]%in%c("mum","mom","mother","Mum","Mom","Dam","Mother","MUM","MOM","DAM","MOTHER")){
+      names(Ped)[2]<-"dam"
+      names(Ped)[3]<-"sire"
+    }
+    if(names(Ped)[2]!="dam"|names(Ped)[3]!="sire"){
+     stop("Unable to identify column names, expecting 'id','dam','sire'")
+    }
+  }
+  
+
 
   if(is.null(cohorts)==FALSE&&length(Ped[,1])!=length(cohorts)) 
     stop("Pedigree and cohorts differ in length.")
@@ -68,7 +85,7 @@ for(x in 1:3) Ped[,x]<-as.character(Ped[,x])
     scaledCohorts<-cohorts-min(cohorts)
     scaledCohorts<-scaledCohorts/max(scaledCohorts)
     scaledCohorts<-(scaledCohorts/1.1)+0.05
-    Ped$ylocs[x]<-plotHeight-scaledCohorts[x] #(Ped$cohorts[x]+1)/max(Ped$cohorts+1) + min(Ped$cohorts+1)/(2*max(Ped$cohorts+1))
+    Ped$ylocs[x]<-plotHeight-scaledCohorts[x] 
     cohortIndex[as.character(Ped$cohorts[x])]<-cohortIndex[as.character(Ped$cohorts[x])]+1
   }
   Ped$xlocs<-Ped$xlocs*0.94+0.03
@@ -84,8 +101,8 @@ for(x in 1:3) Ped[,x]<-as.character(Ped[,x])
     Ped$dots<-"black"
     if(is.null(sex)==FALSE) {
       for(x in 1:length(sex)) {
-        if(sex[x]==sexInd[2]) Ped$dots[x]<-"red"
-        if(sex[x]==sexInd[1]) Ped$dots[x]<-"blue"
+        if(sex[x]==sexInd[2]) Ped$dots[x]<-sexColours[1]
+        if(sex[x]==sexInd[1]) Ped$dots[x]<-sexColours[2]
       }
     }
   }
@@ -161,32 +178,39 @@ for(x in 1:3) Ped[,x]<-as.character(Ped[,x])
     Ped.focal$patylocs.focal<-Ped.focal$ylocs[match(Ped.focal$sire,Ped.focal$id)]
   }
 
-cat(paste("Individuals in full pedigree:",length(Ped[,1]),"\n")); flush.console();
-cat(paste("Individuals in informative pedigree subset:",length(Ped.subset[,1]),"\n")); flush.console();
+  if(is.null(dat)==FALSE) {
+    cat(paste("Individuals in full pedigree:",length(Ped[,1]),"\n")); flush.console();
+    cat(paste("Individuals in informative pedigree subset:",length(Ped.subset[,1]),"\n")); flush.console();
+  }
 
- # x11()
   if(is.null(dat)&is.null(focal)){
     if(links=='all'|links=='mums')
-      grid.segments(Ped$xlocs,Ped$ylocs,Ped$matxlocs,Ped$matylocs,gp=gpar(col="red"))
+      grid.segments(Ped$xlocs,Ped$ylocs,Ped$matxlocs,Ped$matylocs,gp=gpar(col=sexColours[1]))
     if(links=='all'|links=='dads')
-    grid.segments(Ped$xlocs,Ped$ylocs,Ped$patxlocs,Ped$patylocs,gp=gpar(col="blue"))
+    grid.segments(Ped$xlocs,Ped$ylocs,Ped$patxlocs,Ped$patylocs,gp=gpar(col=sexColours[2]))
     if(dots=='y') for(x in 10:0) grid.circle(Ped$xlocs,Ped$ylocs,r=dotSize,gp=gpar(col=Ped$dots,fill=Ped$dots))
   }else{
-    if(plotfull=='y') {
+    if(plotfull=='y'&sexColours[1]=='red') {
       if(links=='all'|links=='mums')
            grid.segments(Ped$xlocs,Ped$ylocs,Ped$matxlocs,Ped$matylocs,gp=gpar(col="gray"))
       if(links=='all'|links=='dads')
            grid.segments(Ped$xlocs,Ped$ylocs,Ped$patxlocs,Ped$patylocs,gp=gpar(col="gray"))
     }
+    if(plotfull=='y'&sexColours[1]!='red') {
+      if(links=='all'|links=='mums')
+           grid.segments(Ped$xlocs,Ped$ylocs,Ped$matxlocs,Ped$matylocs,gp=gpar(col=colours()[354]))
+      if(links=='all'|links=='dads')
+           grid.segments(Ped$xlocs,Ped$ylocs,Ped$patxlocs,Ped$patylocs,gp=gpar(col=colours()[354]))
+    }
     if(is.null(dat)==FALSE&(links=='all'|links=='mums'))
-         grid.segments(Ped.subset$xlocs,Ped.subset$ylocs,Ped.subset$matxlocs,Ped.subset$matylocs,gp=gpar(col="red"))
+         grid.segments(Ped.subset$xlocs,Ped.subset$ylocs,Ped.subset$matxlocs,Ped.subset$matylocs,gp=gpar(col=sexColours[1]))
     if(is.null(dat)==FALSE&(links=='all'|links=='dads'))
-         grid.segments(Ped.subset$xlocs,Ped.subset$ylocs,Ped.subset$patxlocs,Ped.subset$patylocs,gp=gpar(col="blue"))
+         grid.segments(Ped.subset$xlocs,Ped.subset$ylocs,Ped.subset$patxlocs,Ped.subset$patylocs,gp=gpar(col=sexColours[2]))
 
     if(is.null(focal)==FALSE&(links=='all'|links=='mums'))
-         grid.segments(Ped.focal$xlocs,Ped.focal$ylocs,Ped.focal$matxlocs.focal,Ped.focal$matylocs.focal,gp=gpar(col="red"))
+         grid.segments(Ped.focal$xlocs,Ped.focal$ylocs,Ped.focal$matxlocs.focal,Ped.focal$matylocs.focal,gp=gpar(col=sexColours[1]))
     if(is.null(focal)==FALSE&(links=='all'|links=='dads'))
-         grid.segments(Ped.focal$xlocs,Ped.focal$ylocs,Ped.focal$patxlocs.focal,Ped.focal$patylocs.focal,gp=gpar(col="blue"))
+         grid.segments(Ped.focal$xlocs,Ped.focal$ylocs,Ped.focal$patxlocs.focal,Ped.focal$patylocs.focal,gp=gpar(col=sexColours[2]))
 
     if(dots=='y') grid.circle(Ped$xlocs,Ped$ylocs,r=dotSize,gp=gpar(col=Ped$dots,fill=Ped$dots))
     if(dataDots=='y') grid.circle(dataPed$xlocs,dataPed$ylocs,r=dotSize*dataDots.cex,gp=gpar(col='black',fill='black'))

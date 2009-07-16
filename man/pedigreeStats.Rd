@@ -6,7 +6,8 @@
 }
 \usage{
 pedigreeStats(Ped, cohorts = NULL, dat = NULL, 
-              retain='informative', graphicalReport = "y")
+              retain='informative', graphicalReport = "y",
+              includeA=TRUE,lowMem=FALSE,grContrast=FALSE)
 }
 \arguments{
   \item{Ped}{A pedigree}
@@ -14,6 +15,9 @@ pedigreeStats(Ped, cohorts = NULL, dat = NULL,
   \item{dat}{(Optional) Available data based upon which the pedigree can be pruned for just informative individuals}
   \item{retain}{The default value ('informative') results in pedigree being pruned to only those indivduals who's records contribute to estimation of quantitative genetic parameters with respect to the available data specified in \code{dat}.  Otherwise, specifying a value of 'ancestors' will result in the inclusion of all ancestors of phenotyped individuals.}
   \item{graphicalReport}{Controls whether or not grphical output is produced.}
+  \item{includeA}{If TRUE, additive genetic relatedness matrix is returned.}
+  \item{lowMem}{If TRUE, then stats based on calculation of A are not performed.}
+  \item{grContrast}{If TRUE, then uglier shades of red and blue are used to denote male and female statistics in graphical reports, but these colours provide better contrast in greyscale.}
 }
 \value{
   \item{totalMaternities}{Total number of maternities defined by the pedigree.}

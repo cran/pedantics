@@ -60,6 +60,9 @@ pedigreeStats(Ped, cohorts = NULL, dat = NULL,
 \author{Michael Morrissey \email{michael.morrissey@ed.ac.uk}}
 \seealso{\code{\link{fixPedigree}}}
 \examples{
+
+\dontrun{
+
 data(gryphons)
 pedigree<-gryphons[,1:3]
 
@@ -71,4 +74,6 @@ gryphonsPedigreeSummary$totalPaternities
 
 gryphonsPedigreeSummary$maternitiesByCohort
 gryphonsPedigreeSummary$paternitiesByCohort
+
+}
 }

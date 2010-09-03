@@ -159,11 +159,18 @@ if(lowMem==FALSE){
   pairwiseRelatedness<-A*abs(diag(length(A[,1]))-1)
   pairwiseRelatedness[upper.tri(pairwiseRelatedness)]<-0
   pairwiseRelatedness<-c(pairwiseRelatedness)
-  pairwiseRelatedness<-subset(pairwiseRelatedness,pairwiseRelatedness>1e-9)
-  for(x in 1:(length(cutoffs)-1)) {
-    cumulativeRelatedness[x]<-table(pairwiseRelatedness<cutoffs[x+1])["TRUE"]
-    relatednessBin[x]<-table(pairwiseRelatedness>cutoffs[x]&pairwiseRelatedness<cutoffs[x+1])["TRUE"]
+#  pairwiseRelatedness<-subset(pairwiseRelatedness,pairwiseRelatedness>1e-9)
+  for(x in 2:(length(cutoffs)-1)) {
+  #  cumulativeRelatedness[x]<-table(pairwiseRelatedness<cutoffs[x+1])["TRUE"]
+    relatednessBin[x]<-table(pairwiseRelatedness>cutoffs[x]&pairwiseRelatedness<=cutoffs[x+1])["TRUE"]
   }
+  relatednessBin[1]<-((totalSampleSize^2-totalSampleSize)/2)-sum(relatednessBin,na.rm=TRUE)
+  relatednessBin[relatednessBin %in% NA] <- 0
+
+  rb<-relatednessBin/sum(relatednessBin)
+  for(x in 1:(length(cutoffs)-1)) {
+    cumulativeRelatedness[x]<-sum(rb[1:x])
+  }  
 
 }
 

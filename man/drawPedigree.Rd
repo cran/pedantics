@@ -31,9 +31,7 @@ drawPedigree(Ped, cohorts = NULL, sex = NULL, dat = NULL, dots = "n",
   \item{sexColours}{The colours that will be used to draw points and or lines associated with males and females.}
   \item{...}{Additional graphical parameters.}
 }
-\details{
-  ~~ If necessary, more details than the description above ~~
-}
+
 
 \references{Morrissey, M.B, and A.J. Wilson, 2009. pedantics, an R package for pedigree-based genetic simulation, and pedigree manipulation, characterisation, and viewing. Molecular Ecology Resources.}
 \author{Michael Morrissey \email{michael.morrissey@ed.ac.uk}}
@@ -50,6 +48,8 @@ drawPedigree(pedigree)
 drawPedigree(pedigree,cohorts=gryphons$cohort,writeCohortLabels='y',
                                                    cohortLabs.cex=1)
 
+\dontrun{
+
 ## draw the gryphon pedigree by cohort with only maternal links
 drawPedigree(pedigree,cohorts=gryphons$cohort,links='mums')
 
@@ -62,6 +62,8 @@ drawPedigree(pedigree,cohorts=gryphons$cohort,links='mums')
 dataAvailability<-(gryphons$cohort>=(max(gryphons$cohort)-1))+0
 drawPedigree(pedigree,cohorts=gryphons$cohort,sex=gryphons$sex,
    dots='y',dat=dataAvailability,writeCohortLabels='y',dataDots='y')
+
+}
 
 }
 \keyword{hplot}

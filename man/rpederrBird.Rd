@@ -9,7 +9,8 @@ rpederrBird(assumedPedigree, founders = NULL, sex = NULL, samp = NULL,
              sireS = NULL, damS = NULL, cohort = NULL, first = NULL, 
              last = NULL, broods = NULL, monoecey = 0, broodData = NULL, 
              EPPsireData = NULL, propEPPbroods = 1, 
-             propEPPchicksGivenEPPbrood = 0.5, propEPPbroodsTwoFathers = 0, 
+             propEPPchicksGivenEPPbrood = 0.5, 
+             propEPPbroodsTwoFathers = 0, 
              modifyAssumedPedigree = 0,EPPlambda=0.001,
              malePhenotypes=NULL,EPPbeta=0,EPPgamma=0)
 }
@@ -17,7 +18,7 @@ rpederrBird(assumedPedigree, founders = NULL, sex = NULL, samp = NULL,
 \arguments{
   \item{assumedPedigree}{A pedigree}
   \item{founders}{A vector of indicator variables denoting founder status (1=founder, 0=non-founder)}
-  \item{sex}{A vector of indicator variables denoting sex (0=male,1=female,anything else=unknown)}
+  \item{sex}{A vector of indicator variables denoting sex (0=male, 1=female, anything else=unknown)}
   \item{samp}{A vector denoting whether or not individuals are sampled (1), or dummy indivdiuals (0) added to the pedigree for the purpose of simulating potential "true" pedigree links that go outside the sampled population}
   \item{sireS}{Proportion of "true" simulated sires that are to be taken from the unsampled portion of the pedgiree.}
   \item{damS}{Proportion of "true" simulated dams that are to be taken from the unsampled portion of the pedgiree.}
@@ -44,7 +45,7 @@ rpederrBird(assumedPedigree, founders = NULL, sex = NULL, samp = NULL,
   \item{supplementalPedigree}{A plausible pedigree with errors but no missing links}
 }
 \references{Morrissey, M.B, and A.J. Wilson, 2009. pedantics, an R package for pedigree-based genetic simulation, and pedigree manipulation, characterisation, and viewing. Molecular Ecology Resources.}
-\author{Michael Morrissey \email{michael.morrissey@ed.ac.uk}}
+\author{Michael Morrissey \email{michael.morrissey@st-andrews.ac.uk}}
 
 \seealso{ \code{\link{rpederr}} for a simpler module that may be adequate when pedigree errors are (assumably) independent between offspring.}
 \examples{
@@ -81,9 +82,12 @@ EPPsireData<-as.data.frame(cbind(EPPsireIDs,EPPsireYears,sireN,sireE))
 
 ## simulate extra-pair paternity (try a few times and see how often
 ## the paterity goes to the nearer candidate EPP father):
-rpederrBird(assumedPedigree=assumedPedigree,founders=founders,sex=sex,
-        samp=samp,sireS=sireS,damS=damS,cohort=cohort,first=first,
-        last=last,broods=broods,broodData=broodData,EPPsireData=EPPsireData,
+rpederrBird(assumedPedigree=assumedPedigree,
+        founders=founders,sex=sex,
+        samp=samp,sireS=sireS,damS=damS,
+        cohort=cohort,first=first,
+        last=last,broods=broods,broodData=broodData,
+        EPPsireData=EPPsireData,
         propEPPbroods=1,propEPPchicksGivenEPPbrood=0.5,
         propEPPbroodsTwoFathers=0,modifyAssumedPedigree=0)
 

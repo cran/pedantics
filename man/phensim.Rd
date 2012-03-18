@@ -34,7 +34,7 @@ phensim(pedigree, traits = 1, randomA = NULL, randomE = NULL,
 }
 
 \references{Morrissey et al. 2007. Journal of Evolutionary Biology 20:2309-2321., Morrissey, M.B, and A.J. Wilson, 2009. pedantics, an R package for pedigree-based genetic simulation, and pedigree manipulation, characterisation, and viewing. Molecular Ecology Resources.}
-\author{Michael Morrissey \email{michael.morrissey@ed.ac.uk}}
+\author{Michael Morrissey \email{michael.morrissey@st-andrews.ac.uk}}
 
 \examples{
 ## make up a pedigree

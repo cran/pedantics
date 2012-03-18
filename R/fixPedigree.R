@@ -22,7 +22,7 @@ function(Ped, dat=NULL){
   names(IDs)<-"id"
   IDs$dam<-Ped$dam[match(IDs$id,Ped$id)]
   IDs$sire<-Ped$sire[match(IDs$id,Ped$id)]
-  library("kinship")
+  library("kinship2")
   orderPed<-function(ped){
     reorder<-ped[order(kindepth(ped[,1],ped[,2],ped[,3]), decreasing=FALSE),]
     return(reorder)
@@ -30,13 +30,13 @@ function(Ped, dat=NULL){
   fixedPedigree<-orderPed(IDs)
   if(is.null(dat)==FALSE){
     if(names(dat)[1]=='id'|names(dat)[1]=='ID'|names(dat)[1]=='ids'|names(dat)[1]=='IDS'){
-      for(x in 2:length(data[1,])){
+      for(x in 2:length(dat[1,])){
         fixedPedigree[,(3+x-1)]<-dat[match(fixedPedigree[,1],dat[,1]),x]
       }
     } else {
       cat(paste("No id column detected in dat, assuming same order as Ped.",'\n')); flush.console();
       dat$id<-Ped[,1]
-      for(x in 1:(length(data[1,])-1)){
+      for(x in 1:(length(dat[1,])-1)){
         fixedPedigree[,(3+x-1)]<-dat[match(fixedPedigree[,1],dat$id),x]
       }
     }

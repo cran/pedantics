@@ -60,7 +60,7 @@ for(x in 1:3) Ped[,x]<-as.character(Ped[,x])
     stop("Pedigree and sex differ in length.")
 
   library(grid)
-  library(kinship)
+  library(kinship2)
   library(MCMCglmm)
 
 

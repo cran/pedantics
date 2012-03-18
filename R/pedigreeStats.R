@@ -1,7 +1,6 @@
 `pedigreeStats` <-
 function(Ped,cohorts=NULL,dat=NULL,retain='informative',graphicalReport='y',includeA=TRUE,lowMem=FALSE,grContrast=FALSE) {
   library(grid)
-  library(kinship)
   library(MCMCglmm)
 
   "prune"<-function(pedigree, keep, make.base=FALSE){
@@ -45,7 +44,7 @@ function(Ped,cohorts=NULL,dat=NULL,retain='informative',graphicalReport='y',incl
       names(Ped)[3]<-"sire"
     }
     if(names(Ped)[2]!="dam"|names(Ped)[3]!="sire"){
-     stop("Unable to identify column names, expecting 'id','dam','sire'")
+     stop("Unable to identify column names, expecting 'id','dam','sire', or similar")
     }
   }
 
@@ -322,7 +321,8 @@ if(lowMem==FALSE&includeA==TRUE){
                 paternalSibships=patSibships,
                 cumulativeRelatedness=cumulativeRelatedness,
                 relatednessCategories=relatednessBin,
-                analyzedPedigree=Ped)
+                analyzedPedigree=Ped,
+                missingness)
 
   if(is.null(cohorts)==FALSE) {
     results<-list(totalSampleSize=totalSampleSize,

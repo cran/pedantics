@@ -7,7 +7,8 @@
 \usage{
 genomesim(pedigree, founders=NULL, positions=NULL, initHe=NULL, 
              mutationType=NULL, mutationRate=NULL, phenotyped=NULL, 
-             founderHaplotypes=NULL, genotyped=NULL, returnG='n',initFreqs=NULL)
+             founderHaplotypes=NULL, genotyped=NULL, returnG='n',
+             initFreqs=NULL)
 }
 \arguments{
   \item{pedigree}{A pedigree}
@@ -30,7 +31,7 @@ genomesim(pedigree, founders=NULL, positions=NULL, initHe=NULL,
   \item{MarkerData}{A vector of marker genotypes, i.e. alleles at all loci except those designated `cIAM'}
 }
 \references{Morrissey, M.B, and A.J. Wilson, 2009. pedantics, an R package for pedigree-based genetic simulation, and pedigree manipulation, characterisation, and viewing. Molecular Ecology Resources.}
-\author{Michael Morrissey \email{michael.morrissey@ed.ac.uk}}
+\author{Michael Morrissey \email{michael.morrissey@st-andrews.ac.uk}}
 \seealso{\code{\link{phensim}}}
 \examples{
 testData<-as.data.frame(matrix(c(
@@ -74,8 +75,10 @@ testFreqs
 ## with two equally alleles with balanced frequencies in the 
 ## founders, linked (2 cM) to a highly  polymorphic microsatellite:
 genomesim(pedigree=pedigree,founders=testData$founder,positions=c(0,2),
-     mutationType=c('Micro','cIAM'),mutationRate=c(0,0),initFreqs=testFreqs,returnG='y')
-## since we specified returnG='y', we can check that the phenotypes add up to the
+     mutationType=c('Micro','cIAM'),mutationRate=c(0,0),
+     initFreqs=testFreqs,returnG='y')
+## since we specified returnG='y', we can check that 
+## the phenotypes add up to the
 ## allelic substitution effects for the second locus.
 
 }

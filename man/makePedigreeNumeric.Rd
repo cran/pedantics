@@ -21,7 +21,7 @@ makePedigreeNumeric(id, sire, dam, missingVal = NULL)
   \item{idKey}{A key to facilitate conversion back to the original identifiers}
 }
 \references{Morrissey, M.B, and A.J. Wilson, 2009. pedantics, an R package for pedigree-based genetic simulation, and pedigree manipulation, characterisation, and viewing. Molecular Ecology Resources.}
-\author{Michael Morrissey \email{michael.morrissey@ed.ac.uk}}
+\author{Michael Morrissey \email{michael.morrissey@st-andrews.ac.uk}}
 \seealso{\code{\link{makePedigreeFactor}}}
 \examples{
 pedigree<-as.data.frame(matrix(c(

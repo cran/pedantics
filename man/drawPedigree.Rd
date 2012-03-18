@@ -34,7 +34,7 @@ drawPedigree(Ped, cohorts = NULL, sex = NULL, dat = NULL, dots = "n",
 
 
 \references{Morrissey, M.B, and A.J. Wilson, 2009. pedantics, an R package for pedigree-based genetic simulation, and pedigree manipulation, characterisation, and viewing. Molecular Ecology Resources.}
-\author{Michael Morrissey \email{michael.morrissey@ed.ac.uk}}
+\author{Michael Morrissey \email{michael.morrissey@st-andrews.ac.uk}}
 
 \seealso{ \code{\link{fixPedigree}} to prepare pedigrees that may not explicitly contain records for all individuals (i.e., where founding individuals may only appear in the dam or sire column).)}
 \examples{

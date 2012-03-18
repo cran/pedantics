@@ -31,7 +31,7 @@ rpederr(assumedPedigree, founders = NULL, sex = NULL, samp = NULL,
   \item{supplementalPedigree}{A plausible pedigree with errors but no missing links}
 }
 \references{Morrissey et al. 2007. Journal of Evolutionary Biology 20:2309-2321., Morrissey, M.B, and A.J. Wilson, 2009. pedantics, an R package for pedigree-based genetic simulation, and pedigree manipulation, characterisation, and viewing. Molecular Ecology Resources.}
-\author{Michael Morrissey \email{michael.morrissey@ed.ac.uk}}
+\author{Michael Morrissey \email{michael.morrissey@st-andrews.ac.uk}}
 
 \seealso{\code{\link{rpederrBird}}}
 \examples{

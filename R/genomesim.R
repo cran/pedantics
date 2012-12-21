@@ -5,6 +5,20 @@ function(pedigree, founders=NULL, positions=NULL, initHe=NULL,
             mutationType=NULL, mutationRate=NULL, phenotyped=NULL, 
             founderHaplotypes=NULL, genotyped=NULL, returnG='n',initFreqs=NULL){
 
+
+original.order<-order(positions)
+positions<-positions[original.order]
+initHe<-initHe[original.order]
+mutationType<-mutationType[original.order]
+mutationRate<-mutationRate[original.order]
+founderHaplotypes<-founderHaplotypes[,original.order]
+
+
+if(all.equal(original.order,1:length(original.order))==FALSE&is.null(initFreqs)==FALSE) {
+	stop("ordering of initFreqs will fail")
+}
+
+
 "extractA"<-function(G,marker.type="MSW"){
 ## stollen from Jarrod to avoid
 ## dependency on MasterBayes
@@ -104,24 +118,39 @@ function(pedigree, founders=NULL, positions=NULL, initHe=NULL,
 
   ## to get the right bit go to (individual-1)*2+chromosome
   genomes<-matrix(NA,length(pedigree[,1])*2,length(positions))
+  
+  Kosambi.c<-function(m){
+  	f<-function(m,c){m-0.25*log((1+2*c)/(1-2*c))}
+  	c<-m
+  	if(m>0) c<- uniroot(f,c(0,0.5),m=m)$root
+  	c
+  }
 
   segregate<-function(parent){
-    ## crossover numbers and locations
-    crossover.num<-rpois(1,positions[length(positions)]/100)
-    crossover.points<-runif(crossover.num,0,positions[length(positions)])
-    crossover.points<-crossover.points[order(crossover.points)]
+  	# map distances between adjascent loci
+  	map.intervals<-positions[2:length(positions)]-
+  	                  positions[1:(length(positions)-1)]
+  	# Haldane-based expected crossover freq 
+#  	obs.cross.frac<-((1-exp(-2*map.intervals/100))/2)
+    # Kosambi's mapping function
+    obs.cross.frac<-apply(X=as.matrix(map.intervals)/100,MARGIN=1,FUN=Kosambi.c)
 
-    indicator<-array(crossover.num+1,dim=length(positions))
-    for(x in crossover.num:1){
-      indicator[subset(1:length(positions),positions<crossover.points[x])]<-x
+  	# observed recombinations
+  	recomb<-rbinom(length(obs.cross.frac),1,obs.cross.frac)
+
+    p<-genomes[((parent-1)*2+1):((parent-1)*2+2),]
+    
+    offspringHaplotype<-array(dim=length(positions))
+    chromosome<-sample(1:2,1)
+    offspringHaplotype[1]<-p[chromosome,1]
+    for(x in 1:length(map.intervals)){
+    	if(recomb[x]==1&chromosome==1){ chromosome<-2
+    		}else{
+    	if(recomb[x]==1&chromosome==2) chromosome<-1
+    	}
+    	offspringHaplotype[x+1]<-p[chromosome,x+1]
     }
-    indicator<-indicator%%2
-    if(rbinom(1,1,0.5)==1) indicator<-abs(indicator-1)
-
-    offspringHaplotype<-genomes[(parent-1)*2+1,]
-    otherHaplotype<-subset(1:length(positions),indicator==1)
-    offspringHaplotype[otherHaplotype]<-genomes[(parent-1)*2+2,otherHaplotype]
-
+  	
     offspringHaplotype
   }
 

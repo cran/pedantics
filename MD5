@@ -1,9 +1,9 @@
-b3ce7c76dca9066a4830eea69ad074f9 *DESCRIPTION
+5ea70dbc2e802479c9bf4b251ce3a132 *DESCRIPTION
 08bb25b451ae6cffb4c83d1c0d71d94b *NAMESPACE
 d778b3d6631770537a11e0f143dba727 *R/drawPedigree.R
 3c7b545d928a49193025a9751263c96e *R/fixPedigree.R
 c9d543e15babfa793c2598fa23a02b9f *R/fpederr.R
-919f19772497db99a0722a1d43b8498d *R/genomesim.R
+d5decce0d7ace1f724e9428dd581f45f *R/genomesim.R
 72b2ac8758e678b09a9a70e3a333c52e *R/makePedigreeFactor.R
 dfb6a40f7b0b97e16d2fe7127686311d *R/makePedigreeNumeric.R
 121588b355be5d42fa6ec837d1d75ce8 *R/microsim.R
@@ -14,7 +14,7 @@ d130a5ebf02caeb3963ec0964b8bea17 *R/rpederr.R
 c45f9f2fc8d7502e56d116564f84b92c *R/rpederrBird.R
 2b7eda780496c917ddc1af67bcc6de17 *data/gryphons.tab.gz
 55bb6bf86b37c26a2ea0859719c62525 *inst/pedanticsTutorial.pdf
-68e6591781af7e03106a477301941aae *man/drawPedigree.Rd
+6128762d4faa375024b724b2800193e5 *man/drawPedigree.Rd
 918db28dfe01fb27887788f9cd04802f *man/fixPedigree.Rd
 6bbb6fd84ed938e49adff60f71950f31 *man/fpederr.Rd
 77f9093900ac2404acc7ab26c07e6a06 *man/genomesim.Rd

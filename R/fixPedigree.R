@@ -22,7 +22,6 @@ function(Ped, dat=NULL){
   names(IDs)<-"id"
   IDs$dam<-Ped$dam[match(IDs$id,Ped$id)]
   IDs$sire<-Ped$sire[match(IDs$id,Ped$id)]
-  library("kinship2")
   orderPed<-function(ped){
     reorder<-ped[order(kindepth(ped[,1],ped[,2],ped[,3]), decreasing=FALSE),]
     return(reorder)

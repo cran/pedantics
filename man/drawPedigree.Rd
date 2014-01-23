@@ -38,7 +38,9 @@ drawPedigree(Ped, cohorts = NULL, sex = NULL, dat = NULL, dots = "n",
 
 \seealso{ \code{\link{fixPedigree}} to prepare pedigrees that may not explicitly contain records for all individuals (i.e., where founding individuals may only appear in the dam or sire column).)}
 \examples{
+
 \dontrun{
+
 data(gryphons)
 pedigree<-fixPedigree(gryphons[,1:3])
 
@@ -49,7 +51,9 @@ drawPedigree(pedigree)
 drawPedigree(pedigree,cohorts=gryphons$cohort,writeCohortLabels='y',
                                                    cohortLabs.cex=1)
 
+
 ## draw the gryphon pedigree by cohort with only maternal links
+# not run
 drawPedigree(pedigree,cohorts=gryphons$cohort,links='mums')
 
 ## draw the gryphon pedigree by cohort with colour only for those
@@ -58,9 +62,13 @@ drawPedigree(pedigree,cohorts=gryphons$cohort,links='mums')
 ## in the last two cohorts, emphasize the phenotyped individuals
 ## with large black dots, and all other individuals with dots 
 ## colour coded by sex:
-dataAvailability<-(gryphons$cohort>=(max(gryphons$cohort)-1))+0
+
+# not run
+# dataAvailability<-(gryphons$cohort>=(max(gryphons$cohort)-1))+0
 drawPedigree(pedigree,cohorts=gryphons$cohort,sex=gryphons$sex,
    dots='y',dat=dataAvailability,writeCohortLabels='y',dataDots='y')
+
 }
+
 }
 \keyword{hplot}

@@ -59,9 +59,6 @@ for(x in 1:3) Ped[,x]<-as.character(Ped[,x])
   if(is.null(sex)==FALSE&&length(Ped[,1])!=length(sex)) 
     stop("Pedigree and sex differ in length.")
 
-  library(grid)
-  library(kinship2)
-  library(MCMCglmm)
 
 
   if(is.null(cohorts)) cohorts<-kindepth(Ped[,1],Ped[,2],Ped[,3])

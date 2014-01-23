@@ -59,7 +59,7 @@ function(truePedigree,founders=NULL,sex=NULL,samp=NULL,sireE=NULL,damE=NULL,
     if(length(sireE)==1) sireE<-rep(sireE,length(truePedigree[,1]))
     if(length(damE)==1) damE<-rep(damE,length(truePedigree[,1]))
     if(length(sireA)==1) sireA<-rep(sireA,length(truePedigree[,1]))
-    if(length(damA)==1) damA<-rep(damE,length(truePedigree[,1]))
+    if(length(damA)==1) damA<-rep(damA,length(truePedigree[,1]))
    
     numericPed<-makePedigreeNumeric(as.character(truePedigree$id),as.character(truePedigree$sire),
                            as.character(truePedigree$dam),missingVal=-1)

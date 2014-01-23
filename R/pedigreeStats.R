@@ -1,7 +1,6 @@
 `pedigreeStats` <-
 function(Ped,cohorts=NULL,dat=NULL,retain='informative',graphicalReport='y',includeA=TRUE,lowMem=FALSE,grContrast=FALSE) {
-  library(grid)
-  library(MCMCglmm)
+
 
   "prune"<-function(pedigree, keep, make.base=FALSE){
      ind.keep<-keep
@@ -681,19 +680,19 @@ if(lowMem==FALSE){
 
   if(inp=='y'&is.null(cohorts)==FALSE){
     cat("Generating pedigree image...")
-    x11()
+    dev.new()
     drawPedigree(Ped=results$analyzedPedigree,cohorts=results$cohorts,writeCohortLabels='y')
     cat("done.")
     cat('\n')
     readline(prompt = "Pause. Press <Enter> to continue...") 
     cat("Generating image of maternal pedigre links...")
-    x11()
+    dev.new()
     drawPedigree(Ped=results$analyzedPedigree,cohorts=results$cohorts,writeCohortLabels='y',links='mums')
     cat("done.")
     cat('\n')
     readline(prompt = "Pause. Press <Enter> to continue...") 
     cat("Generating image of paternal pedigre links...")
-    x11()
+    dev.new()
     drawPedigree(Ped=results$analyzedPedigree,cohorts=results$cohorts,writeCohortLabels='y',links='dads')
     cat("done.")
     cat('\n')
@@ -701,19 +700,19 @@ if(lowMem==FALSE){
 
   if(inp=='y'&is.null(cohorts)){
     cat("Generating pedigree image...")
-    x11()
+    dev.new()
     drawPedigree(Ped=results$analyzedPedigree)
     cat("done.")
     cat('\n')
     readline(prompt = "Pause. Press <Enter> to continue...") 
     cat("Generating image of maternal pedigre links...")
-    x11()
+    dev.new()
     drawPedigree(Ped=results$analyzedPedigree,links='mums')
     cat("done.")
     cat('\n')
     readline(prompt = "Pause. Press <Enter> to continue...") 
     cat("Generating image of paternal pedigre links...")
-    x11()
+    dev.new()
     drawPedigree(Ped=results$analyzedPedigree,links='dads')
     cat("done.")
     cat('\n')

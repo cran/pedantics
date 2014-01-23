@@ -1,8 +1,8 @@
 useDynLib(pedantics)
-#import(MCMCglmm)
-#import(MasterBayes)
-#import(grid)
-#import(kinship2)
+import(MCMCglmm)
+import(MasterBayes)
+import(grid)
+import(kinship2)
 export(
 drawPedigree,
 fixPedigree,

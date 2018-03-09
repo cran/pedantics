@@ -1,8 +1,18 @@
-useDynLib(pedantics)
+useDynLib(pedantics, .registration = TRUE)
 import(MCMCglmm)
 import(MasterBayes)
 import(grid)
 import(kinship2)
+import(genetics)
+importFrom("grDevices", "colors", "colours", "dev.new", "dev.off",
+"gray.colors", "postscript","savePlot")
+importFrom("graphics", "axis", "barplot", "hist", "lines", "mtext",
+"par", "plot")
+importFrom("stats", "na.omit", "rbinom", "rnorm", "runif", "uniroot",
+"weighted.mean")
+importFrom("utils", "flush.console")
+importFrom("mvtnorm","rmvnorm")
+importFrom("grDevices", "savePlot")
 export(
 drawPedigree,
 fixPedigree,
@@ -14,7 +24,6 @@ pedigreeStats,
 pedStatSummary,
 phensim,
 rpederr,
-rpederrBird,
 genomesim
 ) 
 

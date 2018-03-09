@@ -10,7 +10,6 @@
 
 
 
-using namespace std;
 #include <cstdio>
 #include <cstdlib>
 #include <fstream>
@@ -21,6 +20,7 @@ using namespace std;
 #include <time.h>
 #include <math.h>      
 #include "R.h" 
+using namespace std;
 
 
 
@@ -163,7 +163,8 @@ double rndDouble() {
 // Returns a random number between 0 and 1.  Not used directly, but
 // rather supplies random numbers for all of the other rnd functions:
 
-    float a = (float) rand()/RAND_MAX;  return a;
+//    float a = (float) rand()/RAND_MAX;  return a;
+   float a = (float) unif_rand();  return a;
 }
 
 bool rndError(double probError) {
@@ -306,14 +307,14 @@ bool assignTrueParents(fish& fishy) {
     fishy.realMother = fishy.assignedMother;
     fishy.realFather = fishy.assignedFather;
 
-    if(rndError(fishy.probMotherError) == true
-               & fishy.assignedMotherID != unknownParentageIndicator) {
+    if( (rndError(fishy.probMotherError) == true)
+               & (fishy.assignedMotherID != unknownParentageIndicator) ) {
         bool motherSampled = rndError(fishy.probMotherSampled);
         int sam = 0; if(motherSampled==true) sam = 1;
         fishy.realMother = rndParent(1, sam, fishy.cohort);
     }
-    if(rndError(fishy.probFatherError) == true
-               & fishy.assignedFatherID != unknownParentageIndicator) {
+    if( (rndError(fishy.probFatherError) == true)
+               & (fishy.assignedFatherID != unknownParentageIndicator) ) {
         bool fatherSampled = rndError(fishy.probFatherSampled);
         int sam = 0; if(fatherSampled==true) sam = 1;
         fishy.realFather = rndParent(0, sam, fishy.cohort);
@@ -324,7 +325,7 @@ bool assignTrueParents(fish& fishy) {
         fishy.asFather = true;}else{fishy.asFather = false;}
 
     bool foundParents = true;
-    if(fishy.realMother==-99|fishy.realFather==-99) foundParents == false;
+    if( (fishy.realMother==-99) | (fishy.realFather==-99) ) foundParents = false;
     return foundParents;
 }
 
@@ -415,7 +416,7 @@ bool assignAssignedParents(fish& fishy) {
         fishy.assignedFather = rndParent(0, 1, fishy.cohort);
 
     bool foundParents = true;
-    if(fishy.assignedMother==-99|fishy.assignedFather==-99) foundParents==false;
+    if( (fishy.assignedMother==-99) | (fishy.assignedFather==-99) ) foundParents=false;
     return foundParents;
 }
 
@@ -461,209 +462,6 @@ void fillOutputArraysfpederr(int *assumedMothers, int *assumedFathers, int *comp
   }
 }
 
-
-
-
-void calcBroodEPPfatherProbs(){
-  //initialize arrays to zero
-  for(int x = 1; x <maxBroods; x++) {
-    for(int y = 1; y <maxBroodSize; y++) broodAffinities[x][y]=0;
-    for(int y = 1; y <maxEPPcandidates; y++) broodEPPfatherNums[x][y]=0;
-    for(int y = 1; y <maxEPPcandidates; y++) broodEPPfatherProbs[x][y]=0;
-    broodSize[x]=0;
-    numberCandidateEPPfathersForBrood[x]=0;
-  }
-
-  //go through pedigree and fill in broodAffinities[maxBroods][maxBroodSize], keeping track of broodsSize[maxBroods]
-  for(int f=0; f<pedigreeSize; f++){
-    if(pedigree[f].brood!= -1){
-      broodAffinities[pedigree[f].brood][broodSize[pedigree[f].brood]]=f;
-      if(broodSize[pedigree[f].brood]==0) broodYears[pedigree[f].brood]=pedigree[f].cohort; 
-      broodSize[pedigree[f].brood]++;
-    }
-  }
-
-  //fill in broodEPPfatherNums[maxBroods][maxEPPcandidates] and broodEPPfatherProbs[maxBroods][maxEPPcandidates]
-  for(int c = 0; c < EPPcandidates; c++){
-    for(int b = 0; b < broods; b++) {
-      if(broodYears[b]==EPPsireYearLocs[1][c]) {
-        numberCandidateEPPfathersForBrood[b]++;
-
-        double broodDist=sqrt(((broodNorthing[b]-EPPsireYearLocs[2][c])*(broodNorthing[b]-EPPsireYearLocs[2][c]))+
-                                  ((broodEasting[b]-EPPsireYearLocs[3][c])*(broodEasting[b]-EPPsireYearLocs[3][c])));
-
-        broodEPPfatherNums[b][numberCandidateEPPfathersForBrood[b]-1]=EPPsireYearLocs[0][c];
-        broodEPPfatherProbs[b][numberCandidateEPPfathersForBrood[b]-1]= exp(EPPlambda*broodDist+EPPbeta*EPPsireYearLocs[4][c]+EPPgamma*EPPsireYearLocs[4][c]*EPPsireYearLocs[4][c]);
-      }
-    }
-  }
-
-  for(int b = 0; b < broods; b++) {
-    double relFertSum=0;
-    for(int c = 0; c < numberCandidateEPPfathersForBrood[b]; c++) 
-                                          relFertSum=relFertSum+broodEPPfatherProbs[b][c];
-    for(int c = 0; c < numberCandidateEPPfathersForBrood[b]; c++) 
-                           broodEPPfatherProbs[b][c]=broodEPPfatherProbs[b][c]/relFertSum;
-  }
-}
-
-bool findAssignedParentsBird(fish& fishy) {
-// this differes from the function used by rpederr in that, when parentage is unassigned,
-// plausible parents are selected for broods, rather than individuals
-// finds the assigned parents of an individual in the assumed pedigree.
-// If no parent is assigned in the assumed pedigree, one is chosen from
-// those available for the individual's cohort.  Returns TRUE if parents
-// were successfully located or simulated:
-
-    bool foundMother = false;  bool foundFather = false;
-
-    for(int p = 0; p < pedigreeSize; p++) {
-        if(pedigree[p].ID == fishy.assignedMotherID) {
-                fishy.assignedMother = p;
-                foundMother = true;
-        }
-        if(pedigree[p].ID == fishy.assignedFatherID) {
-                fishy.assignedFather = p;
-                foundFather = true;
-        }
-    }
-
-    if(fishy.assignedMotherID == unknownParentageIndicator&fishy.broodMumAssigned!=1) {
-        bool motherSampled = rndError(fishy.probMotherSampled);
-        int sam = 0; if(motherSampled==true) sam = 1;
-        fishy.assignedMother = rndParent(1, sam, fishy.cohort);
-       // now go through and assign this indiviual for the rest of the brood
-        for(int f = 0; f<pedigreeSize; f++){
-          if(fishy.brood==pedigree[f].brood&pedigree[f].assignedMotherID==unknownParentageIndicator)
-                { pedigree[f].assignedMother=fishy.assignedMother; pedigree[f].broodMumAssigned=1; }
-        }
-        foundMother = true;
-    }
-    if(fishy.broodMumAssigned==1) foundMother = true;
-
-    if(fishy.assignedFatherID == unknownParentageIndicator&fishy.broodDadAssigned!=1) {
-        bool fatherSampled = rndError(fishy.probFatherSampled);
-        int sam = 0; if(fatherSampled==true) sam = 1;
-        fishy.assignedFather = rndParent(0, sam, fishy.cohort);
-
-        foundFather = true;
-        // now go through and assign this indiviual for the rest of the brood
-        for(int f = 0; f<pedigreeSize; f++){
-          if(fishy.brood==pedigree[f].brood&pedigree[f].assignedMotherID==unknownParentageIndicator)
-                { pedigree[f].assignedMother=fishy.assignedMother; pedigree[f].broodDadAssigned=1; }
-        }
-    }
-    if(fishy.broodDadAssigned==1)   foundFather = true;
-
-    bool foundParents = false;
-    if(foundMother==true&foundFather==true
-            &fishy.assignedMother!=-99&fishy.assignedFather!=-99)
-                 foundParents = true;
-
-    return foundParents;
-}
-
-
-
-
-void assignTrueBirdParents() {
-
-// note 'real' parents for null assignments have already been taken care of by this point
-
-  for(int f = 0; f<pedigreeSize; f++){
-    pedigree[f].realMother = pedigree[f].assignedMother;
-    pedigree[f].realFather = pedigree[f].assignedFather;
-
-  }
-
-  double r;
-  for(int b = 0; b < broods; b++){
-    int broodSocialFather=-1;
-    for(int f = 0; f<pedigreeSize; f++) {
-      if(pedigree[f].brood==(b+1)) broodSocialFather=pedigree[f].assignedFather;
-    }
-    if(rndDouble()<propEPPbroods&potentialEPPbroods[b]==1){
-
-      if(rndDouble()>propEPPbroodsTwoFathers){
-        int EPPdad = -1;
-        while(broodEPPfatherNums[b][EPPdad]==broodSocialFather|EPPdad== -1) {
-          r=rndDouble(); EPPdad = -1;
-          while(r>0) { EPPdad++; r=r-broodEPPfatherProbs[b][EPPdad]; }
-        }
-
-        for(int x=0; x<broodSize[b+1]; x++) { 
-          if(rndDouble()<propEPPchicksGivenEPPbrood) {
-            pedigree[broodAffinities[b+1][x]].realFather = broodEPPfatherNums[b][EPPdad]; 
-          }
-        }
-      }else{
-        int EPPdad1 = -1;
-        while(EPPdad1!=broodSocialFather) {
-          r=rndDouble(); EPPdad1 = -1;
-          while(r>0) { EPPdad1++; r=r-broodEPPfatherProbs[b][EPPdad1]; }
-        }
-        int EPPdad2 = -1;
-        while(EPPdad2!=broodSocialFather) {
-          r=rndDouble(); EPPdad2 = -1;
-          while(r>0) { EPPdad2++; r=r-broodEPPfatherProbs[b][EPPdad1]; }
-        }
-        for(int x=0; x<broodSize[b]; x++) { 
-          if(rndDouble()<propEPPchicksGivenEPPbrood) {
-            if(rndDouble()<0.5){
-              pedigree[broodAffinities[b][x]].realFather = EPPdad1; 
-            }else{
-              pedigree[broodAffinities[b][x]].realFather = EPPdad2;               
-            }
-          }
-        }
-      }
-    }
-  }
-}
-
-void copyDataFromRrpederrBird(int *ID, int *assumedMothers, int *assumedFathers, 
-                 int *founder, int *sex,int *sampled, double *fatherSamp, 
-                 double *motherSamp, int *cohort, int *yearMat, int *yearDeath, 
-                 int *brood, int *EPPfatherDatID, 
-                 int *EPPfatherDatYear, double *EPPfatherDatNorthing, 
-                 double *EPPfatherDatEasting, double *EPPfatherDatPhenotype, int *broodY, double *broodN, 
-                 double *broodE, int *potEPPbroods){
-
-  string newstring;
-  stringstream stringconvert;
-
-  for(int f=0; f<pedigreeSize; f++){
-    pedigree[f].ID = IDconvert(ID[f]);
-    pedigree[f].assignedFatherID = IDconvert(assumedFathers[f]);
-    pedigree[f].assignedMotherID = IDconvert(assumedMothers[f]);
-    pedigree[f].founder = founder[f];
-    pedigree[f].sex = sex[f];
-    pedigree[f].sampled = sampled[f];
-    pedigree[f].probFatherSampled = fatherSamp[f];
-    pedigree[f].probMotherSampled = motherSamp[f];
-    pedigree[f].cohort = cohort[f];
-    pedigree[f].yearMat = yearMat[f];
-    pedigree[f].yearDeath = yearDeath[f];
-    pedigree[f].brood = brood[f];
-  }
-
-  for(int b=0;b<broods;b++){
-    broodYears[b]=broodY[b];
-    broodNorthing[b]=broodN[b];
-    broodEasting[b]=broodE[b];
-    potentialEPPbroods[b]=potEPPbroods[b];
-  }
-
-  for(int c=0; c<EPPcandidates; c++){
-    for(int f=0; f<pedigreeSize; f++){
-      if(IDconvert(EPPfatherDatID[c])==pedigree[f].ID) EPPsireYearLocs[0][c]=f; 
-    }
-    EPPsireYearLocs[1][c]=EPPfatherDatYear[c];
-    EPPsireYearLocs[2][c]=EPPfatherDatNorthing[c];
-    EPPsireYearLocs[3][c]=EPPfatherDatEasting[c];
-    EPPsireYearLocs[4][c]=EPPfatherDatPhenotype[c];
-  }
-}
 
 
 extern "C" {
@@ -747,61 +545,6 @@ extern "C" {
 
     fillOutputArraysfpederr(assumedMothers, assumedFathers, completeAssumedMothers, completeAssumedFathers);
 
-  }
-
-  void RPEDERR_R_BIRD(int *ID, int *assumedMothers, int *assumedFathers, int *founder, 
-                 int *sex, int *sampled, double *fatherSamp, double *motherSamp, int *cohort,  
-                 int *yearMat, int *yearDeath, int *pedSize, int *realMothers, 
-                 int *realFathers, int *completeAssumedMothers, int *completeAssumedFathers, 
-                 int *monoecyTRUE, int *brood, int *EPPfatherYearsLength, int *EPPfatherYearsID, 
-                 int *EPPfatherYears,  double *EPPfatherYearsNorthing, double *EPPfatherYearsEasting, 
-                 double *EPPphenotype, double *beta, double *gamma, int *numBroods, 
-                 int *broodY, double *broodN, double *broodE, int *EPPpotential, double *lambda, 
-                 double *pEPPbroods, double *pEPPchicks, double *pEPPtwoFathers){
-
-    broods = *numBroods;
-    EPPcandidates = *EPPfatherYearsLength;
-    pedigreeSize = *pedSize;
-    monoecy = *monoecyTRUE;
-    EPPlambda = *lambda;
-    EPPbeta = *beta;
-    EPPgamma = *gamma;
-
-    propEPPbroods = *pEPPbroods;
-    propEPPchicksGivenEPPbrood = *pEPPchicks;
-    propEPPbroodsTwoFathers = *pEPPtwoFathers;
-
-    copyDataFromRrpederrBird(ID, assumedMothers, assumedFathers, founder, sex, 
-             sampled, fatherSamp, motherSamp, cohort,
-             yearMat, yearDeath, brood, EPPfatherYearsID, EPPfatherYears, EPPfatherYearsNorthing,  
-             EPPfatherYearsEasting, EPPphenotype, broodY, broodN, broodE, EPPpotential);
-
-    Rprintf("\nSorting assigned parents...");
-
-
-    for(int f = 0; f < pedigreeSize; f++) {
-         if(pedigree[f].founder == 0) {
-              bool found = findAssignedParentsBird(pedigree[f]);
-              if(found==false)
-                 Rprintf("\nParent(s) not found for individual at pedigree position %i\n", f);
-         }
-    }
-
-    Rprintf("Done.\n");
-
-    Rprintf("\nCalculating extra-pair relative fertilities...");
-
-    calcBroodEPPfatherProbs();
-
-    Rprintf("Done.\n");
-
-    Rprintf("\nSimulating extra-pair paternities...");
-
-    assignTrueBirdParents();
-
-    Rprintf("Done.\n");
-
-    fillOutputArraysrpederr(realMothers, realFathers, completeAssumedMothers, completeAssumedFathers);
   }
 
 

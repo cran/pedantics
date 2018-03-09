@@ -33,7 +33,6 @@ rpederr(assumedPedigree, founders = NULL, sex = NULL, samp = NULL,
 \references{Morrissey et al. 2007. Journal of Evolutionary Biology 20:2309-2321., Morrissey, M.B, and A.J. Wilson, 2009. pedantics, an R package for pedigree-based genetic simulation, and pedigree manipulation, characterisation, and viewing. Molecular Ecology Resources.}
 \author{Michael Morrissey \email{michael.morrissey@st-andrews.ac.uk}}
 
-\seealso{\code{\link{rpederrBird}}}
 \examples{
 id<-   c("a1","a2","a3","a4","a5","a6","a7","a8","a9")
 dam<-  c(NA,NA,NA,"a1","a1","a1","a4","a4","a4")

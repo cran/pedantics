@@ -20,7 +20,7 @@ if(all.equal(original.order,1:length(original.order))==FALSE&is.null(initFreqs)=
 
 
 "extractA"<-function(G,marker.type="MSW"){
-## stollen from Jarrod to avoid
+## from Jarrod to avoid
 ## dependency on MasterBayes
 
    if(is.genotype(G[[1]])==FALSE & is.genotypeD(G[[1]])==FALSE){

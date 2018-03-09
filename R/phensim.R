@@ -36,7 +36,7 @@ if(is.null(records)==FALSE&&(is.data.frame(records)|is.matrix(records))&&dim(rec
 
   n<-length(pedigree[,1])
   breedingValues<-matrix(0,length(pedigree[,1]),traits)
-  if(is.null(randomA)==FALSE&randomA!=0) breedingValues<-rbv(pedigree,randomA)
+  if(is.null(randomA)==FALSE&sum(diag(randomA))!=0) breedingValues<-rbv(pedigree,randomA)
   environEffects<-NULL
   if(is.matrix(randomE)) {
     environEffects<-rmvnorm(n,rep(0,dim(randomE)[2]),randomE)

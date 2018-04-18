@@ -192,20 +192,20 @@ int rndParent(int sex, int sampled, int reproductiveCohort) {
             counter++;
             p = (int) (rndDouble()*pedigreeSize);
             if(pedigree[p].sex==sex
-               & pedigree[p].sampled==sampled
-               & pedigree[p].yearMat <= reproductiveCohort
-               & pedigree[p].yearDeath >= reproductiveCohort)
+               && pedigree[p].sampled==sampled
+               && pedigree[p].yearMat <= reproductiveCohort
+               && pedigree[p].yearDeath >= reproductiveCohort)
                     parentFound = true;
-            if(counter==100000 & parentAvailable==false){
+            if(counter==100000 && parentAvailable==false){
                 for(int i = 0; i < pedigreeSize; i++){
                     if(pedigree[p].sex==sex
-                        & pedigree[p].sampled==sampled
-                        & pedigree[p].yearMat <= reproductiveCohort
-                        & pedigree[p].yearDeath >= reproductiveCohort)
+                        && pedigree[p].sampled==sampled
+                        && pedigree[p].yearMat <= reproductiveCohort
+                        && pedigree[p].yearDeath >= reproductiveCohort)
                             parentAvailable = true;
                  }
             }
-            if(parentAvailable==false & counter > 100000){
+            if(parentAvailable==false && counter > 100000){
                 parentFound = true;
                 p = -99;
             }
@@ -215,18 +215,18 @@ int rndParent(int sex, int sampled, int reproductiveCohort) {
             counter++;
             p = (int) (rndDouble()*pedigreeSize);
             if(pedigree[p].sampled==sampled
-               & pedigree[p].yearMat <= reproductiveCohort
-               & pedigree[p].yearDeath >= reproductiveCohort)
+               && pedigree[p].yearMat <= reproductiveCohort
+               && pedigree[p].yearDeath >= reproductiveCohort)
                     parentFound = true;
-            if(counter==100000 & parentAvailable==false){
+            if(counter==100000 && parentAvailable==false){
                 for(int i = 0; i < pedigreeSize; i++){
                     if(pedigree[p].sampled==sampled
-                        & pedigree[p].yearMat <= reproductiveCohort
-                        & pedigree[p].yearDeath >= reproductiveCohort)
+                        && pedigree[p].yearMat <= reproductiveCohort
+                        && pedigree[p].yearDeath >= reproductiveCohort)
                             parentAvailable = true;
                  }
             }
-            if(parentAvailable==false & counter > 100000){
+            if(parentAvailable==false && counter > 100000){
                 parentFound = true;
                 p = -99;
             }
@@ -287,8 +287,8 @@ bool findAssignedParents(fish& fishy) {
     }
 
     bool foundParents = false;
-    if(foundMother==true&foundFather==true
-            &fishy.assignedMother!=-99&fishy.assignedFather!=-99)
+    if(foundMother==true && foundFather==true
+            && fishy.assignedMother!=-99 && fishy.assignedFather!=-99)
                  foundParents = true;
     return foundParents;
 }
@@ -390,7 +390,7 @@ bool findRealParents(fish& fishy) {
     }
 
     bool foundParents = false;
-    if(foundMother==true&foundFather==true)
+    if(foundMother==true && foundFather==true)
                  foundParents = true;
     return foundParents;
 }

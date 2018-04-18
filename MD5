@@ -1,4 +1,4 @@
-269ab3423991958e56f816a4ece761a9 *DESCRIPTION
+860c90626bd53f94b1b27ee7771839df *DESCRIPTION
 a93f5309862719774a4970ca8fa15206 *NAMESPACE
 f49e8a7021c15005d487419e22d0e445 *R/drawPedigree.R
 93b9a4efba88386b52f8a1d081267a4d *R/fixPedigree.R
@@ -26,5 +26,5 @@ a01f58c5d9b4805e8db2fb9f0626f6a3 *man/pedStatSummary.Rd
 5d53138c619d38a3a9e6c7f2cd434b62 *man/pedigreeStats.Rd
 5769acad4eb454b2da77d9c13acfb3c8 *man/phensim.Rd
 870596abd3191d1f55b0ce0b7d9d0365 *man/rpederr.Rd
-5a6ee5063387442fb20783675542fbde *src/pedantics.cc
+f3280afe10f5cf0677e1782ad2cc27cc *src/pedantics.cc
 5b240ae72c4fee11e768530b603abc45 *src/pedantics_init.c
